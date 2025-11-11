@@ -24,16 +24,12 @@ SELECT DISTINCT title
 SELECT * 	
 	FROM film; 
 
-
 -- Query final: 
-
 SELECT title, rating
 	FROM film
     WHERE rating = 'PG-13'; 
     
-    
 -- Alternativa: 
-
 SELECT title, rating
 	FROM film
     WHERE rating IN ('PG-13'); 
@@ -64,9 +60,7 @@ SELECT title, length
 	FROM film
     WHERE length > 120; 
     
-
 -- Query final: 
-
 SELECT title 
 	FROM film
     WHERE length > 120; 
@@ -109,9 +103,7 @@ SELECT *
 	FROM actor
     WHERE actor_id BETWEEN 10 and 20; 
     
-    
 -- Query final: 
-
 SELECT first_name, last_name
 	FROM actor
     WHERE actor_id BETWEEN 10 and 20; 
@@ -184,9 +176,7 @@ SELECT c. customer_id, c. first_name, c. last_name, COUNT(r.rental_id)
     ON c.customer_id = r.customer_id
     GROUP BY c. customer_id, c. first_name, c. last_name; 
     
-    
 -- Query final: 
-    
 SELECT c. customer_id AS ID_Cliente, c. first_name AS Nombre, c. last_name AS Apellido, COUNT(r.rental_id) AS Cantidad_Películas_Alquiladas
 	FROM customer AS c
     LEFT JOIN rental AS r
@@ -266,9 +256,7 @@ SELECT c.name AS Categoría, f.title, r.rental_id
 	INNER JOIN rental AS r
 		ON i.inventory_id = r.inventory_id;
 
-
 -- Query final: 
-
 SELECT c.name AS Categoría, COUNT(r.rental_id) AS Recuento_De_Alquileres
 	FROM category AS c
     INNER JOIN film_category as fc
@@ -328,9 +316,7 @@ SELECT first_name, last_name
 		ON fa.film_id = f.film_id
 	WHERE f.title = 'Indian Love'; 
 
-
 -- Query final: 
-
 SELECT first_name AS Nombre, last_name AS Apellido
 	FROM actor AS a
     INNER JOIN film_actor AS fa
@@ -352,9 +338,7 @@ SELECT title, description -- query con comprobación
 	FROM film
     WHERE description LIKE '%dog%' OR description LIKE '%cat%'; 
 
-
 -- Query final: 
-
 SELECT title
 	FROM film
     WHERE description LIKE '%dog%' OR description LIKE '%cat%'; 
@@ -376,9 +360,7 @@ SELECT a.first_name, a.last_name
     LEFT JOIN film_actor AS fa
 		ON a.actor_id = fa.actor_id;
         
-        
 -- Query final: 
-
 SELECT a.first_name, a.last_name
 	FROM actor AS a
     LEFT JOIN film_actor AS fa
@@ -394,16 +376,12 @@ SELECT a.first_name, a.last_name
 SELECT *
 	FROM film; 
 
-
 -- Query final: 
-
 SELECT title, release_year
 	FROM film
     WHERE release_year BETWEEN 2005 AND 2010; 
 
-
 -- Otra forma de consulta: 
-
 SELECT title, release_year
 	FROM film
     WHERE release_year IN (2005, 2006, 2007, 2008, 2009, 2010); 
@@ -428,9 +406,7 @@ SELECT title
     INNER JOIN film_category AS fc
 		ON f.film_id = fc.film_id; 
 
-
 -- Query final: 
-
 SELECT title
 	FROM film AS f
     INNER JOIN film_category AS fc
@@ -439,9 +415,7 @@ SELECT title
 		ON c.category_id = fc.category_id
 	WHERE c.name = 'Family'; 
 
-
 -- Alternativa utilizando una subconsulta: 
-
 SELECT * 
 	FROM category; 
 
@@ -485,9 +459,7 @@ SELECT a.first_name, a.last_name, COUNT(fa.film_id)
 		ON a.actor_id = fa.actor_id
 	GROUP BY a.actor_id;
     
-
 -- Query final: 
-
 SELECT a.first_name AS Nombre, a.last_name AS Apellido
 	FROM actor AS a
     INNER JOIN film_actor AS fa
@@ -512,9 +484,7 @@ SELECT title, rating, length
 	FROM film 
     WHERE rating = 'R' AND length > 120; 
     
-
 -- Query final: 
-
 SELECT title AS Nombre_Película
 	FROM film 
     WHERE rating = 'R' AND length > 120; 
@@ -554,9 +524,7 @@ SELECT a.name
 	GROUP BY a.name
     HAVING AVG(length) > 120; 
 
-
 -- Query final: 
-
 SELECT a.name, AVG(f.length) AS Promedio_Duración
 	FROM category AS a
     INNER JOIN film_category AS fc
@@ -594,14 +562,12 @@ SELECT a.first_name, a.last_name, COUNT(fa.film_id)
 		ON a.actor_id = fa.actor_id
 	GROUP BY a.actor_id;
 
-
 -- Query final: 
-
 SELECT a.first_name AS Nombre, a.last_name AS Apellido, COUNT(fa.film_id) AS Numero_Películas
 	FROM actor AS a
     INNER JOIN film_actor AS fa
 		ON a.actor_id = fa.actor_id
-	GROUP BY a.actor_id
+	GROUP BY a.actor_id, a.first_name, a.last_name
     HAVING COUNT(fa.film_id) >= 5;
 
 -- -----------------------------------------------------
@@ -610,6 +576,55 @@ SELECT a.first_name AS Nombre, a.last_name AS Apellido, COUNT(fa.film_id) AS Num
 · Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. Utiliza una subconsulta para encontrar los rental_ids con una duración superior a 5 días y luego selecciona las películas correspondientes. 
 */
 
+SELECT * 
+	FROM rental; 
+    
+SELECT rental_id, rental_date, return_date
+	FROM rental; 
+    
+SELECT rental_id, return_date, rental_date
+	FROM rental
+    WHERE (return_date - rental_date) > 5; 
+
+SELECT *
+	FROM film; 
+
+SELECT f.title
+	FROM film AS f
+    INNER JOIN inventory AS i
+		ON i.film_id = f.film_id;
+
+SELECT * 
+	FROM rental; 
+    
+SELECT f.title
+	FROM film AS f
+    INNER JOIN inventory AS i
+		ON i.film_id = f.film_id
+	INNER JOIN rental AS r
+		ON r.inventory_id = i.inventory_id;
+    
+SELECT f.title
+	FROM film AS f
+    INNER JOIN inventory AS i
+		ON i.film_id = f.film_id
+	INNER JOIN rental AS r
+		ON r.inventory_id = i.inventory_id
+	WHERE r.rental_id IN (SELECT rental_id
+							FROM rental
+							WHERE (return_date - rental_date) > 5);
+
+-- Query final: 
+SELECT DISTINCT f.title
+	FROM film AS f
+    INNER JOIN inventory AS i
+		ON i.film_id = f.film_id
+	INNER JOIN rental AS r
+		ON r.inventory_id = i.inventory_id
+	WHERE r.rental_id IN (SELECT rental_id
+							FROM rental
+							WHERE (return_date - rental_date) > 5);
+                            
 -- -----------------------------------------------------
 
 /* EJERCICIO 23: 
@@ -676,9 +691,7 @@ SELECT a.actor_id, a.first_name, a.last_name
 									ON c.category_id = fc.category_id
 								WHERE c.name = 'Horror'); 
 
-
 -- Query final: 
-
 SELECT a.first_name AS Nombre, a.last_name AS Apellido
 	FROM actor AS a
     WHERE a.actor_id NOT IN ( SELECT fa.actor_id
@@ -702,9 +715,7 @@ SELECT category_id
 	FROM category
     WHERE name = 'Comedy';
     
-    
 -- Query final: 
-
 SELECT title
 	FROM film AS f
     INNER JOIN film_category AS fc
@@ -712,5 +723,5 @@ SELECT title
 	WHERE fc.category_id = (SELECT category_id
 								FROM category
 								WHERE name = 'Comedy' AND f.length > 180);
- 
+
 -- -----------------------------------------------------
